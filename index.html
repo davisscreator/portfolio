@@ -76,6 +76,7 @@ main,footer{position:relative;z-index:1}
 .wh-bar{position:absolute;left:10px;right:10px;bottom:3px;height:2px;border-radius:2px;background:rgba(216,196,255,.12)}
 .wh-bar i{display:block;height:100%;background:var(--purple);transform-origin:left;transform:scaleX(0)}
 .frame{position:sticky;top:0;height:var(--vh);overflow:hidden}
+@supports (height:100dvh){.frame{height:100dvh}}
 
 /* 1. hero */
 #inicio{height:230vh}
@@ -578,13 +579,13 @@ float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+vec2(1
 void main(){
   vec2 fc=gl_FragCoord.xy;vec2 uv=fc/R.y;
   vec2 w=vec2(0.);float tch=0.;
-  for(int i=0;i<16;i++){vec2 d=(fc-P[i].xy)/R.y;float f=P[i].z*exp(-dot(d,d)*34.);w+=d*f*1.7;tch+=f;}
+  for(int i=0;i<16;i++){vec2 d=(fc-P[i].xy)/R.y;float f=P[i].z*exp(-dot(d,d)*260.);w+=d*f*.9;tch+=f;}
   vec2 q=uv-w;q.y+=S*.45;
   float t=T*.05;
   vec2 o=vec2(fbm(q*1.5+vec2(t,-t)),fbm(q*1.5+vec2(-t*1.2,t*.8)+5.2));
   float m=fbm(q*1.3+o*2.2+vec2(0.,t*1.6)+V*.35);
   float liq=smoothstep(.5,.9,m);
-  liq=clamp(liq+tch*.62,0.,1.);
+  liq=clamp(liq+tch*.3,0.,1.);
   vec3 deep=vec3(.20,.02,.48),pur=vec3(.62,.05,1.);
   vec3 col=deep*liq*.7+pur*pow(liq,3.)*.45;
   float cell=8.*D;
@@ -634,7 +635,7 @@ void main(){
     vel *= .92;
     buf.fill(0);
     pts.forEach((p, i) => {
-      const age = (now - p.t) / 1500;
+      const age = (now - p.t) / 700;
       buf[i*3] = p.x * scale; buf[i*3+1] = (innerHeight - p.y) * scale; buf[i*3+2] = Math.max(0, 1 - age) ** 2;
     });
     gl.uniform2f(uR, cv.width, cv.height); gl.uniform1f(uT, tt); gl.uniform1f(uS, scroll);
@@ -645,11 +646,6 @@ void main(){
   requestAnimationFrame(draw);
   return { set(s, dv){
     scroll = s; vel = Math.min(3, vel + Math.abs(dv) * .004);
-    // keep the liquid answering while the page scrolls under the finger (and through the momentum glide)
-    if (fx >= 0 && dv && (down || performance.now() - upAt < 900)){
-      const now = performance.now(), last = pts[pts.length-1];
-      if (!last || now - last.t > 16){ pts.push({x: fx + (Math.random() - .5) * 18, y: fy, t: now}); if (pts.length > 16) pts.shift(); }
-    }
   } };
 })();
 
