@@ -35,7 +35,7 @@
   --vh:100vh;
   color-scheme:dark;
 }
-@supports (height:100svh){:root{--vh:100svh}}
+@supports (height:100lvh){:root{--vh:100lvh}}
 *{box-sizing:border-box}
 html{overflow-x:clip}
 body{margin:0;background:var(--bg) radial-gradient(60% 40% at 30% 100%,#2a0a5a,transparent);color:var(--paper);font-family:var(--body);font-weight:500;font-size:16px;line-height:1.6;font-synthesis:none;-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -576,13 +576,13 @@ float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+vec2(1
 void main(){
   vec2 fc=gl_FragCoord.xy;vec2 uv=fc/R.y;
   vec2 w=vec2(0.);float tch=0.;
-  for(int i=0;i<16;i++){vec2 d=(fc-P[i].xy)/R.y;float f=P[i].z*exp(-dot(d,d)*70.);w+=d*f*1.4;tch+=f;}
+  for(int i=0;i<16;i++){vec2 d=(fc-P[i].xy)/R.y;float f=P[i].z*exp(-dot(d,d)*34.);w+=d*f*1.7;tch+=f;}
   vec2 q=uv-w;q.y+=S*.45;
   float t=T*.05;
   vec2 o=vec2(fbm(q*1.5+vec2(t,-t)),fbm(q*1.5+vec2(-t*1.2,t*.8)+5.2));
   float m=fbm(q*1.3+o*2.2+vec2(0.,t*1.6)+V*.35);
   float liq=smoothstep(.5,.9,m);
-  liq=clamp(liq+tch*.4,0.,1.);
+  liq=clamp(liq+tch*.62,0.,1.);
   vec3 deep=vec3(.20,.02,.48),pur=vec3(.62,.05,1.);
   vec3 col=deep*liq*.7+pur*pow(liq,3.)*.45;
   float cell=8.*D;
@@ -646,8 +646,7 @@ void main(){
     // keep the liquid answering while the page scrolls under the finger (and through the momentum glide)
     if (fx >= 0 && dv && (down || performance.now() - upAt < 900)){
       const now = performance.now(), last = pts[pts.length-1];
-      fy = Math.max(0, Math.min(innerHeight, fy - dv * .35));
-      if (!last || now - last.t > 22){ pts.push({x: fx, y: fy, t: now}); if (pts.length > 16) pts.shift(); }
+      if (!last || now - last.t > 16){ pts.push({x: fx + (Math.random() - .5) * 18, y: fy, t: now}); if (pts.length > 16) pts.shift(); }
     }
   } };
 })();
@@ -749,21 +748,23 @@ const dockLinks = [...document.querySelectorAll(".dock [data-go]")], fmLink = do
 const dockMark = el => { [...dockLinks, fmLink].forEach(a => a.setAttribute("aria-current", a === el ? "true" : "false")); };
 let targets = [], lastY = scrollY, mobile = innerWidth < 760;
 
+let VH = innerHeight, VW = innerWidth;
 function size(){
+  document.documentElement.style.setProperty("--vh", VH + "px");
   mobile = innerWidth < 760;
   if (RM) return;
   const vw = innerWidth, maxX = Math.max(0, track.scrollWidth - vw);
   targets = chapters.map(c => clamp(c.offsetLeft - (vw - c.offsetWidth) / 2, 0, maxX));
-  S.works.style.height = ((chapters.length - 1) * innerHeight * 1.15 + innerHeight) + "px";
+  S.works.style.height = ((chapters.length - 1) * VH * 1.15 + VH) + "px";
 }
 function state(el){
-  const r = el.getBoundingClientRect(), vh = innerHeight, len = el.offsetHeight - vh;
+  const r = el.getBoundingClientRect(), vh = VH, len = el.offsetHeight - vh;
   return { on: r.bottom > -vh * .25 && r.top < vh * 1.25, p: len > 0 ? clamp(-r.top / len, 0, 1) : 0, v: clamp((vh - r.top) / (vh + r.height), 0, 1) };
 }
 const T = (el, tf, op) => { el.style.transform = tf; if (op !== undefined) el.style.opacity = op; };
 
 function tick(){
-  const vh = innerHeight;
+  const vh = VH;
   let st;
   st = state(S.hero);
   if (st.on){
@@ -829,7 +830,10 @@ let raf = 0;
 const schedule = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; tick(); }); };
 if (!RM){
   addEventListener("scroll", schedule, {passive:true});
-  addEventListener("resize", () => { size(); schedule(); layout(); });
+  addEventListener("resize", () => {
+    // only rebuild the layout when width changes (rotation); iOS toolbars only change the height
+    if (Math.abs(innerWidth - VW) < 2 && Math.abs(innerHeight - VH) < 160) { schedule(); return; }
+    VW = innerWidth; VH = innerHeight; size(); schedule(); layout(); });
   addEventListener("load", () => { size(); tick(); });
   size(); tick();
 } else {
