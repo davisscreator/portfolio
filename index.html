@@ -173,8 +173,8 @@ main,footer{position:relative;z-index:1}
 
 /* 6. about */
 .about .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,5vw,72px);padding-block:12vh;align-items:start}
-.slot{position:sticky;top:12vh;width:min(100%,380px);aspect-ratio:4/5;border:1.5px dashed rgba(216,196,255,.35);border-radius:18px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:.85rem;padding:20px;background:rgba(10,7,15,.35)}
-.slot b{display:block;font:800 1rem var(--body);color:var(--paper);margin-bottom:6px}
+.slot{position:sticky;top:12vh;width:min(100%,400px);margin:0;border-radius:18px;overflow:hidden;box-shadow:0 30px 70px -24px rgba(153,1,255,.55),0 0 0 1px var(--line)}
+.slot img{width:100%;height:auto;display:block}
 .about h2{font-size:clamp(2.2rem,5.4vw,3.8rem);margin-bottom:20px}
 .about .text p{max-width:60ch;color:#dad1e8;margin:0 0 14px}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:30px;margin-top:34px}
@@ -427,7 +427,7 @@ footer img{height:26px;width:auto}
 
   <section class="about" id="sobre" data-scene="about">
     <div class="wrap">
-      <div class="slot" aria-hidden="true"><div><b>Espaço da sua arte</b>proporção 4:5 · PNG com fundo transparente</div></div>
+      <figure class="slot"><img src="img/sobre.webp" alt="Davisson de perfil, iluminado de roxo, segurando um estabilizador" width="900" height="1125" loading="lazy"></figure>
       <div class="text">
         <div class="label">Sobre</div>
         <h2>E aí, tudo bem?</h2>
